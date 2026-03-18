@@ -13,6 +13,7 @@ import { applyTailwindMapping } from '@/lib/css-to-tailwind';
 import { findComponentRoot, expandBoundary, contractBoundary } from '@/lib/component-boundary';
 import { captureInteractionState } from './interaction-capture';
 import { extractDesignTokens } from '@/lib/design-token-extractor';
+import { startBridge } from './mcp-bridge-client';
 
 let isInspecting = false;
 let hoveredElement: Element | null = null;
@@ -85,11 +86,11 @@ async function performExtraction(root: Element) {
     mode: 'component',
   };
 
-  // Send to service worker
+  // Send to service worker (may fail if service worker is inactive)
   chrome.runtime.sendMessage({
     type: 'INSPECTION_RESULT',
     payload: extraction,
-  } as Message<ComponentExtraction>);
+  } as Message<ComponentExtraction>).catch(() => {});
 }
 
 function extractLocalDesignTokens(node: ExtractedNode) {
@@ -260,9 +261,12 @@ chrome.runtime.onMessage.addListener((message: Message, _sender, sendResponse) =
       chrome.runtime.sendMessage({
         type: 'DESIGN_SYSTEM_RESULT',
         payload: tokens,
-      });
+      }).catch(() => {});
       sendResponse({ ok: true });
       break;
     }
   }
 });
+
+// Start MCP bridge connection (connects to local MCP server if running)
+startBridge();

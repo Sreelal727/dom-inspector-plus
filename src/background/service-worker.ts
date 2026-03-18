@@ -47,11 +47,11 @@ onMessage('EXPORT_REQUEST', async (message) => {
 
   const result = await exportExtraction(extraction, format, target);
 
-  // Broadcast result
+  // Broadcast result (may fail if no listener is open)
   chrome.runtime.sendMessage({
     type: 'EXPORT_RESULT',
     payload: result,
-  });
+  }).catch(() => {});
 });
 
 // ---- Toggle inspector via action click ----
