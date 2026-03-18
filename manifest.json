@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "DOM Inspector Plus",
+  "description": "Extract UI components as AI-ready prompts. Hover, click, copy — vibe code faster.",
+  "version": "0.1.0",
+  "icons": {
+    "16": "public/icons/icon16.png",
+    "48": "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "sidePanel",
+    "offscreen",
+    "clipboardWrite"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/content-script.ts"],
+      "run_at": "document_idle"
+    }
+  ],
+  "side_panel": {
+    "default_path": "src/sidepanel/sidepanel.html"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "DOM Inspector Plus"
+  },
+  "devtools_page": "src/devtools/devtools-page.html",
+  "commands": {
+    "toggle-inspector": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+X",
+        "mac": "Command+Shift+X"
+      },
+      "description": "Toggle DOM Inspector"
+    },
+    "copy-prompt": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+C",
+        "mac": "Command+Shift+C"
+      },
+      "description": "Copy current selection as AI prompt"
+    }
+  }
+}

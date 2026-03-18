@@ -1,0 +1,36 @@
+<!-- Open this in a browser to generate icon PNGs -->
+<canvas id="c16" width="16" height="16"></canvas>
+<canvas id="c48" width="48" height="48"></canvas>
+<canvas id="c128" width="128" height="128"></canvas>
+<script>
+function drawIcon(canvas) {
+  const ctx = canvas.getContext('2d');
+  const s = canvas.width;
+  // Background
+  ctx.fillStyle = '#1e1e2e';
+  ctx.beginPath();
+  ctx.roundRect(0, 0, s, s, s * 0.15);
+  ctx.fill();
+  // Plus symbol
+  ctx.strokeStyle = '#89b4fa';
+  ctx.lineWidth = s * 0.08;
+  ctx.lineCap = 'round';
+  const m = s * 0.3, n = s * 0.7;
+  // Crosshair
+  ctx.beginPath();
+  ctx.moveTo(s/2, m); ctx.lineTo(s/2, n);
+  ctx.moveTo(m, s/2); ctx.lineTo(n, s/2);
+  ctx.stroke();
+  // Corner brackets
+  ctx.strokeStyle = '#cba6f7';
+  ctx.lineWidth = s * 0.06;
+  const p = s * 0.15, q = s * 0.85, c = s * 0.25;
+  ctx.beginPath();
+  ctx.moveTo(p, p+c); ctx.lineTo(p, p); ctx.lineTo(p+c, p);
+  ctx.moveTo(q-c, p); ctx.lineTo(q, p); ctx.lineTo(q, p+c);
+  ctx.moveTo(q, q-c); ctx.lineTo(q, q); ctx.lineTo(q-c, q);
+  ctx.moveTo(p+c, q); ctx.lineTo(p, q); ctx.lineTo(p, q-c);
+  ctx.stroke();
+}
+['c16','c48','c128'].forEach(id => drawIcon(document.getElementById(id)));
+</script>

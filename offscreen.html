@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <textarea id="clipboard-area" style="position:fixed;left:-9999px;"></textarea>
+  <script>
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.type === 'CLIPBOARD_WRITE') {
+        const area = document.getElementById('clipboard-area');
+        area.value = message.payload;
+        area.select();
+        document.execCommand('copy');
+      }
+    });
+  </script>
+</body>
+</html>
