@@ -17,6 +17,7 @@ const FORMAT_OPTIONS: { value: ExportFormat; label: string; description: string 
   { value: 'html-css', label: 'HTML + CSS', description: 'Raw HTML with scoped styles' },
   { value: 'tailwind-only', label: 'Tailwind', description: 'Class strings per element' },
   { value: 'json', label: 'JSON', description: 'Full structured data' },
+  { value: 'toon', label: 'TOON', description: 'Token-optimized for LLMs' },
 ];
 
 export function ExportPanel({ extraction }: ExportPanelProps) {

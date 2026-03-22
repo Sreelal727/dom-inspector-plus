@@ -9,7 +9,7 @@ export type NodeId = string;
 export type InspectionMode = 'element' | 'component' | 'design-system';
 
 /** Export formats */
-export type ExportFormat = 'ai-prompt' | 'json' | 'react-jsx' | 'html-css' | 'tailwind-only';
+export type ExportFormat = 'ai-prompt' | 'json' | 'toon' | 'react-jsx' | 'html-css' | 'tailwind-only';
 
 /** AI integration targets */
 export type AITarget = 'claude' | 'v0' | 'cursor' | 'clipboard';

@@ -17,6 +17,7 @@ export function generateExport(
   switch (format) {
     case 'ai-prompt': return generateAIPrompt(extraction);
     case 'json': return generateJSON(extraction);
+    case 'toon': return generateTOON(extraction);
     case 'react-jsx': return generateReactJSX(extraction);
     case 'html-css': return generateHTMLCSS(extraction);
     case 'tailwind-only': return generateTailwindOnly(extraction);
@@ -254,6 +255,99 @@ function weightToName(w: string): string {
 
 function generateJSON(extraction: ComponentExtraction): string {
   return JSON.stringify(extraction, null, 2);
+}
+
+// ---- Format 2b: TOON (Token-Oriented Object Notation) ----
+
+function generateTOON(extraction: ComponentExtraction): string {
+  const lines: string[] = [];
+  objectToTOON(extraction as unknown as Record<string, unknown>, 0, lines);
+  return lines.join('\n');
+}
+
+function objectToTOON(obj: Record<string, unknown>, depth: number, lines: string[]) {
+  const indent = '  '.repeat(depth);
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === null || value === undefined) {
+      lines.push(`${indent}${key}: null`);
+    } else if (typeof value === 'boolean' || typeof value === 'number') {
+      lines.push(`${indent}${key}: ${value}`);
+    } else if (typeof value === 'string') {
+      lines.push(`${indent}${key}: ${toonEscapeString(value)}`);
+    } else if (Array.isArray(value)) {
+      arrayToTOON(key, value, depth, lines);
+    } else if (typeof value === 'object') {
+      lines.push(`${indent}${key}:`);
+      objectToTOON(value as Record<string, unknown>, depth + 1, lines);
+    }
+  }
+}
+
+function arrayToTOON(key: string, arr: unknown[], depth: number, lines: string[]) {
+  const indent = '  '.repeat(depth);
+  const childIndent = '  '.repeat(depth + 1);
+
+  if (arr.length === 0) {
+    lines.push(`${indent}${key}[0]:`);
+    return;
+  }
+
+  // Primitive array
+  if (arr.every(v => v === null || typeof v !== 'object')) {
+    const values = arr.map(v => v === null ? 'null' : toonEscapeString(String(v)));
+    lines.push(`${indent}${key}[${arr.length}]: ${values.join(',')}`);
+    return;
+  }
+
+  // Array of uniform objects → tabular format
+  if (arr.every(v => v !== null && typeof v === 'object' && !Array.isArray(v))) {
+    const objects = arr as Record<string, unknown>[];
+    const fieldSets = objects.map(o => Object.keys(o));
+    const firstFields = fieldSets[0];
+    const isUniform = fieldSets.every(
+      fs => fs.length === firstFields.length && fs.every((f, i) => f === firstFields[i])
+    );
+
+    // Only use tabular if all values are primitives
+    const allPrimitive = isUniform && objects.every(o =>
+      Object.values(o).every(v => v === null || typeof v !== 'object')
+    );
+
+    if (isUniform && allPrimitive) {
+      lines.push(`${indent}${key}[${arr.length}]{${firstFields.join(',')}}:`);
+      for (const obj of objects) {
+        const vals = firstFields.map(f => {
+          const v = obj[f];
+          if (v === null || v === undefined) return 'null';
+          return toonEscapeString(String(v));
+        });
+        lines.push(`${childIndent}${vals.join(',')}`);
+      }
+      return;
+    }
+  }
+
+  // Fallback: mixed or nested array items
+  lines.push(`${indent}${key}[${arr.length}]:`);
+  for (const item of arr) {
+    if (item === null || typeof item !== 'object') {
+      lines.push(`${childIndent}- ${item === null ? 'null' : toonEscapeString(String(item))}`);
+    } else if (Array.isArray(item)) {
+      lines.push(`${childIndent}-`);
+      arrayToTOON('', item, depth + 2, lines);
+    } else {
+      lines.push(`${childIndent}-`);
+      objectToTOON(item as Record<string, unknown>, depth + 2, lines);
+    }
+  }
+}
+
+function toonEscapeString(value: string): string {
+  // Quote strings that contain commas, newlines, or leading/trailing whitespace
+  if (value.includes(',') || value.includes('\n') || value !== value.trim()) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
 }
 
 // ---- Format 3: React JSX Skeleton ----
